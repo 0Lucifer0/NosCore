@@ -2,18 +2,18 @@
 // |  \| |/__\ /' _/ / _//__\| _ \ __|
 // | | ' | \/ |`._`.| \_| \/ | v / _|
 // |_|\__|\__/ |___/ \__/\__/|_|_\___|
-// 
+//
 // Copyright (C) 2019 - NosCore
-// 
+//
 // NosCore is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -52,6 +52,7 @@ namespace NosCore.GameObject.Tests.Services.InventoryService
             {
                 new Item {Type = NoscorePocketType.Main, VNum = 1012},
                 new Item {Type = NoscorePocketType.Main, VNum = 1013},
+                new Item {Type = NoscorePocketType.Etc, VNum = 1027},
                 new Item {Type = NoscorePocketType.Equipment, VNum = 1, ItemType = ItemType.Weapon},
                 new Item {Type = NoscorePocketType.Equipment, VNum = 2, ItemType = ItemType.Weapon},
                 new Item {Type = NoscorePocketType.Equipment, VNum = 912, ItemType = ItemType.Specialist},
@@ -219,7 +220,62 @@ namespace NosCore.GameObject.Tests.Services.InventoryService
             Assert.IsTrue((destinationItem?.ItemInstance?.Amount == 999) && (destinationItem.Slot == 1));
         }
 
-        //TODO RemoveItemAmountFromInventory
+        [TestMethod]
+        public void RemoveItemAmountFromInventoryByGuidWithoutRemove()
+        {
+            var item = Inventory!.AddItemToPocket(InventoryItemInstance.Create(_itemProvider!.Create(1027, 999), 0))!.First();
+            Inventory!.RemoveItemAmountFromInventory(499, item.ItemInstanceId);
+            Assert.IsTrue(item.ItemInstance?.Amount == 500);
+        }
+
+        [TestMethod]
+        public void RemoveItemAmountFromInventoryByGuidWithRemove()
+        {
+            var item = Inventory!.AddItemToPocket(InventoryItemInstance.Create(_itemProvider!.Create(1027, 999), 0))!.First();
+            Inventory!.RemoveItemAmountFromInventory(999, item.ItemInstanceId);
+            Assert.IsTrue(Inventory.LoadBySlotAndType(item.Slot, NoscorePocketType.Etc) == null);
+        }
+
+        [TestMethod]
+        public void RemoveItemAmountFromInventoryByVNum()
+        {
+            var itemSlot0 = Inventory!.AddItemToPocket(InventoryItemInstance.Create(_itemProvider!.Create(1027, 5), 0), NoscorePocketType.Etc, 0)!.First();
+            var itemSlot1 = Inventory!.AddItemToPocket(InventoryItemInstance.Create(_itemProvider!.Create(1027, 3), 0), NoscorePocketType.Etc, 1)!.First();
+            var itemSlot2 = Inventory!.AddItemToPocket(InventoryItemInstance.Create(_itemProvider!.Create(1027, 10), 0), NoscorePocketType.Etc, 2)!.First();
+            Inventory!.RemoveItemAmountFromInventory(15, 1027);
+            Assert.IsTrue(Inventory.LoadBySlotAndType(itemSlot2.Slot, NoscorePocketType.Etc)?.ItemInstance == null);
+            Assert.IsTrue(Inventory.LoadBySlotAndType(itemSlot1.Slot, NoscorePocketType.Etc)?.ItemInstance == null);
+            Assert.IsTrue(Inventory.LoadBySlotAndType(itemSlot0.Slot, NoscorePocketType.Etc)?.ItemInstance?.Amount == 3);
+        }
+
+        [TestMethod]
+        public void RemoveItemAmountFromInventoryByVNumWithoutItemOrAmount()
+        {
+            Assert.IsTrue(Inventory?.RemoveItemAmountFromInventory(15, 1027).Count == 0);
+            Assert.IsTrue(Inventory?.RemoveItemAmountFromInventory(0, 1027).Count == 0);
+            Inventory?.AddItemToPocket(InventoryItemInstance.Create(_itemProvider!.Create(1027, 10), 0), NoscorePocketType.Etc, 0)?.First();
+            Assert.IsTrue(Inventory?.RemoveItemAmountFromInventory(15, 1027).Count == 0);
+        }
+
+        [TestMethod]
+        public void LoadByVNumAndAmount()
+        {
+            Inventory?.AddItemToPocket(InventoryItemInstance.Create(_itemProvider!.Create(1027, 5), 0), NoscorePocketType.Etc, 0)?.First();
+            Inventory?.AddItemToPocket(InventoryItemInstance.Create(_itemProvider!.Create(1027, 3), 0), NoscorePocketType.Etc, 1)?.First();
+            Assert.IsTrue(Inventory?.LoadByVNumAndAmount(1027, 3).Count == 1);
+            Assert.IsTrue(Inventory?.LoadByVNumAndAmount(1027, 6).Count == 2);
+        }
+
+        [TestMethod]
+        public void LoadByVNumAndAmountWithoutItemOrAmount()
+        {
+            Assert.IsTrue(Inventory?.LoadByVNumAndAmount(1027, 3).Count == 0);
+            Inventory?.AddItemToPocket(InventoryItemInstance.Create(_itemProvider!.Create(1027, 5), 0), NoscorePocketType.Etc, 0)?.First();
+            Assert.IsTrue(Inventory?.LoadByVNumAndAmount(1027, 3).Count == 1);
+            Assert.IsTrue(Inventory?.LoadByVNumAndAmount(1027, 6).Count == 0);
+            Inventory?.AddItemToPocket(InventoryItemInstance.Create(_itemProvider!.Create(1027, 10), 0), NoscorePocketType.Etc, 1)?.First();
+            Assert.IsTrue(Inventory?.LoadByVNumAndAmount(1027, 12).Count == 2);
+        }
 
         //TODO EnoughPlace
 

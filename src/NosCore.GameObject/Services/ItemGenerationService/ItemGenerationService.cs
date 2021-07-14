@@ -2,18 +2,18 @@
 // |  \| |/__\ /' _/ / _//__\| _ \ __|
 // | | ' | \/ |`._`.| \_| \/ | v / _|
 // |_|\__|\__/ |___/ \__/\__/|_|_\___|
-// 
+//
 // Copyright (C) 2019 - NosCore
-// 
+//
 // NosCore is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -37,6 +37,7 @@ namespace NosCore.GameObject.Services.ItemGenerationService
         private readonly IEventLoaderService<Item.Item, Tuple<InventoryItemInstance, UseItemPacket>>? _runner;
         private readonly List<ItemDto> _items;
         private readonly ILogger _logger;
+
         public ItemGenerationService(List<ItemDto> items, ILogger logger)
         {
             _items = items;
@@ -126,6 +127,7 @@ namespace NosCore.GameObject.Services.ItemGenerationService
                                 Design = design,
                                 Upgrade = upgrade
                             };
+
                         case ItemType.Box:
                             return new BoxInstance(itemToCreate)
                             {
@@ -133,13 +135,39 @@ namespace NosCore.GameObject.Services.ItemGenerationService
                                 Upgrade = upgrade,
                                 Design = design
                             };
+
                         default:
                             var wear = new WearableInstance(itemToCreate, _logger)
                             {
                                 Amount = amount,
                                 Rare = rare,
                                 Upgrade = upgrade,
-                                Design = design
+                                Design = design,
+                                Ammo = itemToCreate.MaximumAmmo,
+                                Cellon = itemToCreate.CellonLvl,
+                                CloseDefence = itemToCreate.CloseDefence,
+                                Concentrate = itemToCreate.Concentrate,
+                                CriticalLuckRate = itemToCreate.CriticalLuckRate,
+                                CriticalRate = itemToCreate.CriticalRate,
+                                DamageMaximum = itemToCreate.DamageMaximum,
+                                DamageMinimum = itemToCreate.DamageMinimum,
+                                DarkElement = itemToCreate.DarkElement,
+                                DarkResistance = itemToCreate.DarkResistance,
+                                DefenceDodge = itemToCreate.DefenceDodge,
+                                DistanceDefence = itemToCreate.DistanceDefence,
+                                DistanceDefenceDodge = itemToCreate.DistanceDefenceDodge,
+                                ElementRate = itemToCreate.ElementRate,
+                                FireElement = itemToCreate.FireElement,
+                                FireResistance = itemToCreate.FireResistance,
+                                HitRate = itemToCreate.HitRate,
+                                Hp = itemToCreate.Hp,
+                                LightElement = itemToCreate.LightElement,
+                                LightResistance = itemToCreate.LightResistance,
+                                MagicDefence = itemToCreate.MagicDefence,
+                                MaxElementRate = itemToCreate.MaxElementRate,
+                                Mp = itemToCreate.Mp,
+                                WaterElement = itemToCreate.WaterElement,
+                                WaterResistance = itemToCreate.WaterResistance
                             };
                             if (wear.Rare > 0)
                             {

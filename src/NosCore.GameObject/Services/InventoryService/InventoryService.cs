@@ -2,18 +2,18 @@
 // |  \| |/__\ /' _/ / _//__\| _ \ __|
 // | | ' | \/ |`._`.| \_| \/ | v / _|
 // |_|\__|\__/ |___/ \__/\__/|_|_\___|
-// 
+//
 // Copyright (C) 2019 - NosCore
-// 
+//
 // NosCore is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -82,6 +82,25 @@ namespace NosCore.GameObject.Services.InventoryService
             }
 
             return retItem;
+        }
+
+        public List<InventoryItemInstance?> LoadByVNumAndAmount(short vnum, short amount)
+        {
+            var result = new List<InventoryItemInstance?>();
+            if (CountItem(vnum) < amount)
+            {
+                return result;
+            }
+            foreach (var item in this.Select(s => s.Value).OrderByDescending(o => o.Slot).Where(w => w.ItemInstance!.ItemVNum == vnum).ToList())
+            {
+                result.Add(item);
+                amount -= item.ItemInstance!.Amount;
+                if (amount <= 0)
+                {
+                    break;
+                }
+            }
+            return result;
         }
 
         public bool CanAddItem(short itemVnum)
@@ -369,6 +388,7 @@ namespace NosCore.GameObject.Services.InventoryService
                     case null when sourcePocket.ItemInstance.Amount == amount:
                         sourcePocket.Slot = destinationSlot;
                         break;
+
                     case null:
                         var itemDest = (IItemInstance)sourcePocket.ItemInstance.Clone();
                         sourcePocket.ItemInstance.Amount -= amount;
@@ -384,6 +404,7 @@ namespace NosCore.GameObject.Services.InventoryService
                             ItemInstanceId = itemDest.Id
                         }, sourcetype, destinationSlot);
                         break;
+
                     default:
                         if ((destinationPocket.ItemInstance?.ItemVNum == sourcePocket.ItemInstance.ItemVNum)
                             && ((sourcePocket.ItemInstance.Item!.Type == NoscorePocketType.Main) ||
@@ -484,6 +505,23 @@ namespace NosCore.GameObject.Services.InventoryService
             var e = new InvalidOperationException("Expected item wasn't deleted, Type or Slot did not match!");
             _logger.Error(e.Message, e);
             return null;
+        }
+
+        public List<InventoryItemInstance?> RemoveItemAmountFromInventory(short amount, short vnum)
+        {
+            var result = new List<InventoryItemInstance?>();
+            if (CountItem(vnum) < amount)
+            {
+                return result;
+            }
+            while (amount != 0)
+            {
+                var item = this.OrderByDescending(o => o.Value.Slot).Where(w => w.Value.ItemInstance!.ItemVNum == vnum).FirstOrDefault();
+                var removedItem = RemoveItemAmountFromInventory(amount, item.Key);
+                amount -= removedItem != null ? amount : (short)(item.Value.ItemInstance!.Amount + amount);
+                result.Add(removedItem);
+            }
+            return result;
         }
 
         private short? GetFreeSlot(NoscorePocketType type)

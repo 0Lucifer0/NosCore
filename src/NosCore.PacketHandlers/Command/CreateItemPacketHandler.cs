@@ -2,18 +2,18 @@
 // |  \| |/__\ /' _/ / _//__\| _ \ __|
 // | | ' | \/ |`._`.| \_| \/ | v / _|
 // |_|\__|\__/ |___/ \__/\__/|_|_\___|
-// 
+//
 // Copyright (C) 2019 - NosCore
-// 
+//
 // NosCore is a free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or any later version.
-// 
+//
 // This program is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -36,6 +36,7 @@ using NosCore.Packets.ServerPackets.UI;
 using Serilog;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+
 //TODO stop using obsolete
 #pragma warning disable 618
 
@@ -155,13 +156,15 @@ namespace NosCore.PacketHandlers.Command
                     case EquipmentType.SecondaryWeapon:
                         wearable.SetRarityPoint();
                         break;
+
                     case EquipmentType.Boots:
                     case EquipmentType.Gloves:
-                        wearable.FireResistance = (short)(wearable.Item.FireResistance * upgrade);
-                        wearable.DarkResistance = (short)(wearable.Item.DarkResistance * upgrade);
-                        wearable.LightResistance = (short)(wearable.Item.LightResistance * upgrade);
-                        wearable.WaterResistance = (short)(wearable.Item.WaterResistance * upgrade);
+                        wearable.FireResistance = (short)(wearable.Item.FireResistance * (upgrade + 1));
+                        wearable.DarkResistance = (short)(wearable.Item.DarkResistance * (upgrade + 1));
+                        wearable.LightResistance = (short)(wearable.Item.LightResistance * (upgrade + 1));
+                        wearable.WaterResistance = (short)(wearable.Item.WaterResistance * (upgrade + 1));
                         break;
+
                     default:
                         _logger.Debug(
                             LogLanguage.Instance.GetMessageFromKey(LogLanguageKey.NO_SPECIAL_PROPERTIES_WEARABLE));
